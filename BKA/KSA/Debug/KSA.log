@@ -1,0 +1,31 @@
+﻿  SHA-256 with BKA.cpp
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(549,21): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(550,21): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(553,18): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(555,17): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(578,17): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(586,21): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(587,21): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(588,21): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1197,21): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1198,30): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1199,30): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1200,30): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1201,30): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1202,30): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1203,30): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1796,23): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1797,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1798,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1799,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1800,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1801,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(1802,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(2395,23): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(2396,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(2397,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(2398,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(2399,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(2400,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+C:\Users\Cameron\source\repos\My Project Code\BKA\KSA\SHA-256 with BKA.cpp(2401,32): warning C4244: '=': conversion from 'unsigned __int64' to 'BYTE', possible loss of data
+  KSA.vcxproj -> C:\Users\Cameron\source\repos\My Project Code\BKA\Debug\KSA.exe
