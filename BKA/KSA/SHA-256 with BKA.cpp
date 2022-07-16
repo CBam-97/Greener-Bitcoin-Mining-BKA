@@ -68,10 +68,10 @@ WORD CSAcout(WORD A, WORD B, WORD C_In)
 // Original BKA32 function
 WORD BKA32(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 {
-	//Code for non-approximate Brent-Kung adder, adapted from verilog: https://github.com/Anvesh98/Brentkung-Adder/blob/main/bentkung.v
+	//Code for approximate Brent-Kung adder with K=16 function
 	//BKA output
 	WORD out;
-	WORD S[32];
+	WORD sum[32];
 
 	int i, ii, u = 0;
 	WORD a[33] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }, b[33] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
@@ -80,6 +80,8 @@ WORD BKA32(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 
 	WORD P1[32], P2[16], P3[8], P4[4], P5[2], P6;
 	WORD G1[32], G2[16], G3[8], G4[4], G5[2], G6;
+
+	WORD appsum[32], appcout;
 
 	// convert a to binary
 	for (i = 0; n > 0; i++)
@@ -105,79 +107,81 @@ WORD BKA32(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 	int l = 0;
 	for (l = 0; l <= 31; l = l + 1)
 	{
-		P1[l] = a[l] ^ b[l];
-		G1[l] = a[l] & b[l];
+		//Propagate
+		P1[l] = a[l] ^ b[l]; //pi = ai + bi,
+		//Generate
+		G1[l] = a[l] & b[l]; // gi = ai .bi
 	}
 	//------------------------------------------
-	
+
 	//Garry Generation Network -----------------
-	//Generate 2nd order P's and G's
+	//Generate 2nd order P's and G's // all 2 bit values
 	int len;
 	for (len = 0; len <= 15; len = len + 1)
 	{
 		P2[len] = P1[2 * len + 1] & P1[2 * len];
-		G2[len] = G1[2*len+1] | (P1[2*len+1] & G1[2*len]);
+		G2[len] = G1[2 * len + 1] | (P1[2 * len + 1] & G1[2 * len]);
 	}
 
-	//Generate 3rd order P's and G's
+	//Generate 3rd order P's and G's //all 4 bit values
 	for (len = 0; len <= 7; len = len + 1)
 	{
 		P3[len] = P2[2 * len + 1] & P2[2 * len];
-		G3[len] = G2[2 * len + 1] | (P2[2 * len + 1] & G2[2*len]);
+		G3[len] = G2[2 * len + 1] | (P2[2 * len + 1] & G2[2 * len]);
 	}
 
-	//Generate 4th order P's and G's
+	//Generate 4th order P's and G's //all 8 bit values?
 	for (len = 0; len <= 3; len = len + 1)
 	{
 		P4[len] = P3[2 * len + 1] & P3[2 * len];
-		G4[len] = G3[2 * len + 1] | (P3[2 * len + 1] & G3[2*len]);
+		G4[len] = G3[2 * len + 1] | (P3[2 * len + 1] & G3[2 * len]);
 	}
 
-	//Generate 5th order P's and G's
+	//Generate 5th order P's and G's //all 16 bit values?
 	for (len = 0; len <= 1; len = len + 1)
 	{
 		P5[len] = P4[2 * len + 1] & P4[2 * len];
-		G5[len] = G4[2 * len + 1] | (P4[2 * len + 1] & G4[2*len]);
+		G5[len] = G4[2 * len + 1] | (P4[2 * len + 1] & G4[2 * len]);
 	}
 
-	//Generate 6th order P's and G's
+	//Generate 6th order P's and G's //all 32 bit values?
 	P6 = P5[2 * len + 1] & P5[2 * len];
 	G6 = G5[2 * len + 1] | (P5[2 * len + 1] & G5[2 * len]);
-	//------------------------------------------
+	//--------------------------------------------
 
-	//Post Processing Stage --------------------
+	//Post Processing Stage ----------------------
 	//Generate all carry signals that can be calculated directly from input
 	C[1] = G1[0] | (P1[0] & C[0]);
 	C[2] = G2[0] | (P2[0] & C[0]);
 	C[4] = G3[0] | (P3[0] & C[0]);
 	C[8] = G4[0] | (P4[0] & C[0]);
 	C[16] = G5[0] | (P5[0] & C[0]);
-	C[32] = G6 | (P6 & C[0]);
+	C[32] = G6 | (P6 & C[0]); 
+	//these are fine
 
 	//Now generating remaining carries
-	C[3] = G1[2] | (P1[2] & C[2]);
+	C[3] = G1[2] | (P1[2] & C[2]); //Ci+i = gi + Pi * Ci
 	C[5] = G1[4] | (P1[4] & C[4]);
 	C[6] = G2[2] | (P2[2] & C[4]);
+	C[7] = G1[6] | (P1[6] & C[6]);
+
 	C[9] = G1[8] | (P1[8] & C[8]);
 	C[10] = G2[4] | (P2[4] & C[8]);
-	C[12] = G3[2] | (P3[2] & C[8]);
-
-	C[13] = G1[12] | (P1[12] & C[12]);
-	C[7] = G1[6] | (P1[6] & C[6]);
 	C[11] = G1[10] | (P1[10] & C[10]);
+	C[12] = G3[2] | (P3[2] & C[8]);
+	C[13] = G1[12] | (P1[12] & C[12]);
 	C[14] = G2[6] | (P2[6] & C[12]);
 
 	C[15] = G1[14] | (P1[14] & C[14]);
 	C[17] = G1[16] | (P1[16] & C[16]);
 	C[18] = G2[8] | (P2[8] & C[16]); //2nd order => /2
+	C[19] = G1[18] | (P1[18] & C[18]);
 	C[20] = G3[4] | (P3[4] & C[16]); //3rd order = /4
 
-	C[19] = G1[18] | (P1[18] & C[18]);
 	C[21] = G1[20] | (P1[20] & C[20]);
 	C[22] = G2[10] | (P2[10] & C[20]);
-	C[24] = G3[5] | (P3[5] & C[20]); //4th order => /8
-
 	C[23] = G1[22] | (P1[22] & C[22]);
+	C[24] = G3[5] | (P3[5] & C[20]); //4th order => /8
 	C[25] = G1[24] | (P1[24] & C[24]);
 	C[26] = G2[12] | (P2[12] & C[24]);
 	C[28] = G3[6] | (P3[6] & C[24]);
@@ -185,17 +189,16 @@ WORD BKA32(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 	C[27] = G1[26] | (P1[26] & C[26]);
 	C[29] = G1[28] | (P1[28] & C[28]);
 	C[30] = G2[14] | (P2[14] & C[28]);
-
 	C[31] = G1[30] | (P1[30] & C[30]);
-	
-	for (i = 0; i <= 31; i=i+1)
+
+	for (i = 0; i <= 31; i = i + 1)
 	{
-		S[i] = P1[i] ^ C[i];
+		sum[i] = P1[i] ^ C[i]; //sum bits of the adder
 	}
-	//------------------------------------------
+	//--------------------------------------------
 	cout = C[32];
 
-	WORD c[] = { cout, S[31], S[30], S[29], S[28], S[27], S[26], S[25], S[24], S[23], S[22], S[21], S[20], S[19], S[18], S[17], S[16], S[15], S[14], S[13], S[12], S[11], S[10], S[9], S[8], S[7], S[6], S[5], S[4], S[3], S[2], S[1], S[0]};
+	WORD c[] = { cout, sum[31], sum[30], sum[29], sum[28], sum[27], sum[26], sum[25], sum[24], sum[23], sum[22], sum[21], sum[20], sum[19], sum[18], sum[17], sum[16], sum[15], sum[14], sum[13], sum[12], sum[11], sum[10], sum[9], sum[8], sum[7], sum[6], sum[5], sum[4], sum[3], sum[2], sum[1], sum[0] };
 	//WORD c[] = { S[0], S[1], S[2], S[3], S[4], S[5], S[6], S[7], S[8], S[9], S[10], S[11], S[12], S[13], S[14], S[15], S[16], S[17], S[18], S[19], S[20], S[21], S[22], S[23], S[24], S[25], S[26], S[27], S[28], S[29], S[30], S[31], cout };
 	//printf("Binary number = %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d \n", cout, S[31], S[30], S[29], S[28], S[27], S[26], S[25], S[24], S[23], S[22], S[21], S[20], S[19], S[18], S[17], S[16], S[15], S[14], S[13], S[12], S[11], S[10], S[9], S[8], S[7], S[6], S[5], S[4], S[3], S[2], S[1], S[0]);
 
@@ -229,7 +232,7 @@ WORD BKA32(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 // Approximate BKA32 with K = 8 function
 WORD BKA32N8(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 {
-	//Code for approximate Brent-Kung adder with K=8 function
+	//Code for non-approximate Brent-Kung adder, adapted from verilog: https://github.com/Anvesh98/Brentkung-Adder/blob/main/bentkung.v
 	//BKA output
 	WORD out;
 	WORD S[32];
@@ -239,8 +242,8 @@ WORD BKA32N8(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 	WORD cin = 0, cout;
 	WORD C[33];
 
-	WORD P1[32], P2[16], P3[8], P4[4], P5[2], P6;
-	WORD G1[32], G2[16], G3[8], G4[4], G5[2], G6;
+	WORD P1[32], P2[16], P3[8], P4[4];
+	WORD G1[32], G2[16], G3[8], G4[4];
 
 	// convert a to binary
 	for (i = 0; n > 0; i++)
@@ -272,90 +275,163 @@ WORD BKA32N8(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 	//------------------------------------------
 
 	//Garry Generation Network -----------------
-	//Generate 2nd order P's and G's
+	//Generate 2nd order P's and G's //2nd row
 	int len;
-	for (len = 0; len <= 15; len = len + 1)
+	for (len = 0; len <= 15; len = len + 1) // all 2 bit values
 	{
 		P2[len] = P1[2 * len + 1] & P1[2 * len];
 		G2[len] = G1[2 * len + 1] | (P1[2 * len + 1] & G1[2 * len]);
 	}
 
-	//Generate 3rd order P's and G's
-	for (len = 0; len <= 7; len = len + 1)
+	//Generate 3rd order P's and G's //3rd row
+	for (len = 0; len <= 7; len = len + 1) // all 4 bit values
 	{
 		P3[len] = P2[2 * len + 1] & P2[2 * len];
 		G3[len] = G2[2 * len + 1] | (P2[2 * len + 1] & G2[2 * len]);
 	}
 
-	//Generate 4th order P's and G's
-	for (len = 0; len <= 3; len = len + 1)
+	//Generate 4th order P's and G's //4th row
+	for (len = 0; len <= 3; len = len + 1) // all 8 bit values
 	{
 		P4[len] = P3[2 * len + 1] & P3[2 * len];
 		G4[len] = G3[2 * len + 1] | (P3[2 * len + 1] & G3[2 * len]);
 	}
-
-	//Generate 5th order P's and G's
-	for (len = 0; len <= 1; len = len + 1)
-	{
-		P5[len] = P4[2 * len + 1] & P4[2 * len];
-		G5[len] = G4[2 * len + 1] | (P4[2 * len + 1] & G4[2 * len]);
-	}
-
-	//Generate 6th order P's and G's
-	P6 = P5[2 * len + 1] & P5[2 * len];
-	G6 = G5[2 * len + 1] | (P5[2 * len + 1] & G5[2 * len]);
-	//------------------------------------------
 
 	//Post Processing Stage --------------------
 	//Generate all carry signals that can be calculated directly from input
 	C[1] = G1[0] | (P1[0] & C[0]);
 	C[2] = G2[0] | (P2[0] & C[0]);
 	C[4] = G3[0] | (P3[0] & C[0]);
-	C[8] = G4[0] | (P4[0] & C[0]);
-	C[16] = G5[0] | (P5[0] & C[0]);
-	C[32] = G6 | (P6 & C[0]);
 
 	//Now generating remaining carries
-	C[3] = G1[2] | (P1[2] & C[2]);
-	C[5] = G1[4] | (P1[4] & C[4]);
-	C[6] = G2[2] | (P2[2] & C[4]);
-	C[9] = G1[8] | (P1[8] & C[8]);
-	C[10] = G2[4] | (P2[4] & C[8]);
-	C[12] = G3[2] | (P3[2] & C[8]);
+	C[3] = G1[2] | (P1[2] & C[2]); 
+	C[5] = G1[4] | (P1[4] & C[4]); 
+	C[6] = G2[2] | (P2[2] & C[4]); 
+	C[7] = G1[6] | (P1[6] & C[6]); 
+	C[8] = G4[0] | (P4[0] & C[4]); 
+	C[9] = G1[8] | (P1[8] & C[8]); 
+	C[10] = G2[4] | (P2[4] & C[8]); 
+	C[11] = G1[10] | (P1[10] & C[10]);
+	C[12] = G3[2] | (P3[2] & C[8]); 
+	C[13] = G1[12] | (P1[12] & C[12]); 
+	C[14] = G2[6] | (P2[6] & C[12]);
+	C[15] = G1[14] | (P1[14] & C[14]);
 
-	C[13] = G1[12] | (P1[12]);// & C[12]);
-	C[7] = G1[6] | (P1[6] & C[6]);
-	C[11] = G1[10] | (P1[10]);// & C[10]);
-	C[14] = G2[6] | (P2[6]);// & C[12]);
+	C[16] = G4[1] | (P4[1] & C[0]);  //Root Carry 16
+	C[17] = G1[16] | (P1[16] & C[16]);
+	C[18] = G2[8] | (P2[8] & C[16]);
+	C[19] = G1[18] | (P1[18] & C[18]);
+	C[20] = G3[4] | (P3[4] & C[16]);
+	C[21] = G1[20] | (P1[20] & C[20]);
+	C[22] = G2[10] | (P2[10] & C[20]);
+	C[23] = G1[22] | (P1[22] & C[22]);
 
-	C[15] = G1[14] | (P1[14]);// & C[14]);
-	C[17] = G1[16] | (P1[16]);// & C[16]);
-	C[18] = G2[8] | (P2[8]);// & C[16]); //2nd order => /2
-	C[20] = G3[4] | (P3[4]);// & C[16]); //3rd order = /4
+	C[24] = G4[2] | (P4[2] & C[0]); //Root Carry 24 
+	C[25] = G1[24] | (P1[24] & C[24]);
+	C[26] = G2[12] | (P2[12] & C[24]);
+	C[27] = G1[26] | (P1[26] & C[26]);
+	C[28] = G3[6] | (P3[6] & C[24]);
+	C[29] = G1[28] | (P1[28] & C[28]);
+	C[30] = G2[14] | (P2[14] & C[28]);
+	C[31] = G1[30] | (P1[30] & C[30]);
 
-	C[19] = G1[18] | (P1[18]);// & C[18]);
-	C[21] = G1[20] | (P1[20]);// & C[20]);
-	C[22] = G2[10] | (P2[10]);// & C[20]);
-	C[24] = G3[5] | (P3[5]);// & C[20]); //4th order => /8
+	C[32] = G4[3] | (P4[3] & C[25]);
 
-	C[23] = G1[22] | (P1[22]);// & C[22]);
-	C[25] = G1[24] | (P1[24]);// & C[24]);
-	C[26] = G2[12] | (P2[12]);// & C[24]);
-	C[28] = G3[6] | (P3[6]);// & C[24]);
+	//SMALLER TREE in https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7508416
 
-	C[27] = G1[26] | (P1[26]); //& C[26]);
-	C[29] = G1[28] | (P1[28]); //& C[28]);
-	C[30] = G2[14] | (P2[14]); //& C[28]);
+	////Post Processing Stage --------------------
+	////Generate all carry signals that can be calculated directly from input
+	//C[1] = G1[0] | (P1[0] & C[0]);
+	//C[2] = G2[0] | (P2[0] & C[0]);
+	//C[4] = G3[0] | (P3[0] & C[0]);
 
-	C[31] = G1[30] | (P1[30]); //&C[30]);
+	////Now generating remaining carries
+	//C[3] = G1[2] | (P1[2] & C[2]);
+	//C[5] = G1[4] | (P1[4] & C[4]);
+	//C[6] = G2[2] | (P2[2] & C[4]);
+	//C[7] = G1[6] | (P1[6] & C[6]);
+
+	//C[8] = G3[1] | (P3[1] & C[0]); // Root Carry 8
+	//C[9] = G1[8] | (P1[8] & C[8]);
+	//C[10] = G2[4] | (P2[4] & C[8]);
+	//C[11] = G1[10] | (P1[10] & C[10]);
+	//C[12] = G3[2] | (P3[2] & C[8]); // Root Carry 12
+	//C[13] = G1[12] | (P1[12] & C[12]);
+	//C[14] = G2[6] | (P2[6] & C[12]);
+	//C[15] = G1[14] | (P1[14] & C[14]);
+
+	//C[16] = G3[3] | (P3[3] & C[0]); // Root Carry 16
+	//C[17] = G1[16] | (P1[16] & C[16]);
+	//C[18] = G2[8] | (P2[8] & C[16]);
+	//C[19] = G1[18] | (P1[18] & C[18]);
+	//C[20] = G3[4] | (P3[4] & C[16]); // Root Carry 20
+	//C[21] = G1[20] | (P1[20] & C[20]);
+	//C[22] = G2[10] | (P2[10] & C[20]);
+	//C[23] = G1[22] | (P1[22] & C[22]); 
+
+	//C[24] = G3[5] | (P3[5] & C[0]); // Root Carry 24
+	//C[25] = G1[24] | (P1[24] & C[24]);
+	//C[26] = G2[12] | (P2[12] & C[24]);
+	//C[27] = G1[26] | (P1[26] & C[26]);
+	//C[28] = G3[6] | (P3[6] & C[24]); // Root Carry 28
+	//C[29] = G1[28] | (P1[28] & C[28]); 
+	//C[30] = G2[14] | (P2[14] & C[28]); 
+	//C[31] = G1[30] | (P1[30] & C[30]); 
+
+	//C[32] = G3[7] | (P3[7] & C[29]);
+
+	////Post Processing Stage --------------------
+	////Generate all carry signals that can be calculated directly from input
+	//C[1] = G1[0] | (P1[0] & C[0]);
+	//C[2] = G2[0] | (P2[0] & C[0]);
+	//C[4] = G3[0] | (P3[0] & C[0]);
+
+	////Now generating remaining carries
+	//C[3] = G1[2] | (P1[2] & C[2]);
+
+	//C[5] = G1[4] | (P1[4] & C[4]);
+	//C[6] = G2[2] | (P2[2] & C[4]);
+	//C[7] = G1[6] | (P1[6] & C[6]);
+	//C[8] = G3[1] | (P3[1] & C[6]);
+
+	//C[9] = G1[8] | (P1[8] & C[8]);
+	//C[10] = G2[4] | (P2[4] & C[8]);
+	//C[11] = G1[10] | (P1[10] & C[10]);
+	//C[12] = G3[2] | (P3[2] & C[10]);
+
+	//C[13] = G1[12] | (P1[12] & C[12]);
+	//C[14] = G2[6] | (P2[6] & C[12]);
+	//C[15] = G1[14] | (P1[14] & C[14]);
+	//C[16] = G3[3] | (P3[3] & C[14]);
+
+	//C[17] = G1[16] | (P1[16] & C[16]);
+	//C[18] = G2[8] | (P2[8] & C[16]);
+	//C[19] = G1[18] | (P1[18] & C[18]);
+	//C[20] = G3[4] | (P3[4] & C[18]);
+
+	//C[21] = G1[20] | (P1[20] & C[20]);
+	//C[22] = G2[10] | (P2[10] & C[20]);
+	//C[23] = G1[22] | (P1[22] & C[22]);
+	//C[24] = G3[5] | (P3[5] & C[22]);
+
+	//C[25] = G1[24] | (P1[24] & C[24]);
+	//C[26] = G2[12] | (P2[12] & C[24]);
+	//C[27] = G1[26] | (P1[26] & C[26]);
+	//C[28] = G3[6] | (P3[6] & C[26]);
+
+	//C[29] = G1[28] | (P1[28] & C[28]);
+	//C[30] = G2[14] | (P2[14] & C[28]);
+	//C[31] = G1[30] | (P1[30] & C[30]);
+	//C[32] = G3[7] | (P3[7] & C[30]);
 
 	for (i = 0; i <= 31; i = i + 1)
 	{
-		S[i] = P1[i] ^ C[i];
+		S[i] = P1[i] ^ C[i]; //carries and group propagate
 	}
 	//------------------------------------------
 	cout = C[32];
 
+	//WORD c[] = { cout, C[31], C[30], C[29], C[28], C[27], C[26], C[25], C[24],C[23], C[22], C[21], C[20], C[19], C[18], C[17], C[16], C[15], C[14], C[13], C[12], C[11], C[10], C[9], C[8], C[7], C[6], C[5], C[4], C[3], C[2], C[1], C[0] };
 	WORD c[] = { cout, S[31], S[30], S[29], S[28], S[27], S[26], S[25], S[24], S[23], S[22], S[21], S[20], S[19], S[18], S[17], S[16], S[15], S[14], S[13], S[12], S[11], S[10], S[9], S[8], S[7], S[6], S[5], S[4], S[3], S[2], S[1], S[0] };
 	//WORD c[] = { S[0], S[1], S[2], S[3], S[4], S[5], S[6], S[7], S[8], S[9], S[10], S[11], S[12], S[13], S[14], S[15], S[16], S[17], S[18], S[19], S[20], S[21], S[22], S[23], S[24], S[25], S[26], S[27], S[28], S[29], S[30], S[31], cout };
 	//printf("Binary number = %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d \n", cout, S[31], S[30], S[29], S[28], S[27], S[26], S[25], S[24], S[23], S[22], S[21], S[20], S[19], S[18], S[17], S[16], S[15], S[14], S[13], S[12], S[11], S[10], S[9], S[8], S[7], S[6], S[5], S[4], S[3], S[2], S[1], S[0]);
@@ -390,7 +466,7 @@ WORD BKA32N8(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 // Approximate BKA32 with K = 16 function
 WORD BKA32N16(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 {
-	//Code for approximate Brent-Kung adder with K=16 function
+	//Code for non-approximate Brent-Kung adder, adapted from verilog: https://github.com/Anvesh98/Brentkung-Adder/blob/main/bentkung.v
 	//BKA output
 	WORD out;
 	WORD S[32];
@@ -400,8 +476,8 @@ WORD BKA32N16(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 	WORD cin = 0, cout;
 	WORD C[33];
 
-	WORD P1[32], P2[16], P3[8], P4[4], P5[2], P6;
-	WORD G1[32], G2[16], G3[8], G4[4], G5[2], G6;
+	WORD P1[32], P2[16], P3[8], P4[4];
+	WORD G1[32], G2[16], G3[8], G4[4];
 
 	// convert a to binary
 	for (i = 0; n > 0; i++)
@@ -433,90 +509,113 @@ WORD BKA32N16(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 	//------------------------------------------
 
 	//Garry Generation Network -----------------
-	//Generate 2nd order P's and G's
+	//Generate 2nd order P's and G's //2nd row
 	int len;
-	for (len = 0; len <= 15; len = len + 1)
+	for (len = 0; len <= 15; len = len + 1) // all 2 bit values
 	{
 		P2[len] = P1[2 * len + 1] & P1[2 * len];
 		G2[len] = G1[2 * len + 1] | (P1[2 * len + 1] & G1[2 * len]);
 	}
 
-	//Generate 3rd order P's and G's
-	for (len = 0; len <= 7; len = len + 1)
+	//Generate 3rd order P's and G's //3rd row
+	for (len = 0; len <= 7; len = len + 1) // all 4 bit values
 	{
 		P3[len] = P2[2 * len + 1] & P2[2 * len];
 		G3[len] = G2[2 * len + 1] | (P2[2 * len + 1] & G2[2 * len]);
 	}
 
-	//Generate 4th order P's and G's
-	for (len = 0; len <= 3; len = len + 1)
+	//Generate 4th order P's and G's //4th row
+	for (len = 0; len <= 3; len = len + 1) // all 8 bit values
 	{
 		P4[len] = P3[2 * len + 1] & P3[2 * len];
 		G4[len] = G3[2 * len + 1] | (P3[2 * len + 1] & G3[2 * len]);
 	}
 
-	//Generate 5th order P's and G's
-	for (len = 0; len <= 1; len = len + 1)
-	{
-		P5[len] = P4[2 * len + 1] & P4[2 * len];
-		G5[len] = G4[2 * len + 1] | (P4[2 * len + 1] & G4[2 * len]);
-	}
-
-	//Generate 6th order P's and G's
-	P6 = P5[2 * len + 1] & P5[2 * len];
-	G6 = G5[2 * len + 1] | (P5[2 * len + 1] & G5[2 * len]);
-	//--------------------------------------------
-
-	//Post Processing Stage ----------------------
+	//Post Processing Stage --------------------
 	//Generate all carry signals that can be calculated directly from input
-	C[1] = G1[0] | (P1[0] & C[0]);
-	C[2] = G2[0] | (P2[0] & C[0]);
-	C[4] = G3[0] | (P3[0] & C[0]);
-	C[8] = G4[0] | (P4[0] & C[0]);
-	C[16] = G5[0] | (P5[0] & C[0]);
-	C[32] = G6 | (P6 & C[0]);
+	C[1] = G1[0] | (P1[0] & C[0]);//
+	C[2] = G2[0] | (P2[0] & C[0]);//
+	C[4] = G3[0] | (P3[0] & C[0]);//
 
 	//Now generating remaining carries
-	C[3] = G1[2] | (P1[2] & C[2]);
-	C[5] = G1[4] | (P1[4] & C[4]);
-	C[6] = G2[2] | (P2[2] & C[4]);
-	C[9] = G1[8] | (P1[8] & C[8]);
-	C[10] = G2[4] | (P2[4] & C[8]);
-	C[12] = G3[2] | (P3[2] & C[8]);
+	C[3] = G1[2] | (P1[2] & C[2]); //
+	C[5] = G1[4] | (P1[4] & C[4]); //
+	C[6] = G2[2] | (P2[2] & C[4]); //
+	C[7] = G1[6] | (P1[6] & C[6]); //
+	C[8] = G4[0] | (P4[0] & C[4]); //
+	C[9] = G1[8] | (P1[8] & C[8]); //
+	C[10] = G2[4] | (P2[4] & C[8]); //
+	C[11] = G1[10] | (P1[10] & C[10]);// 
+	C[12] = G3[2] | (P3[2] & C[8]); //
+	C[13] = G1[12] | (P1[12] & C[12]); //
+	C[14] = G2[6] | (P2[6] & C[12]);//
+	C[15] = G1[14] | (P1[14] & C[14]);//
 
-	C[13] = G1[12] | (P1[12] & C[12]);
-	C[7] = G1[6] | (P1[6] & C[6]);
-	C[11] = G1[10] | (P1[10] & C[10]);
-	C[14] = G2[6] | (P2[6] & C[12]);
+	C[16] = G4[1] | (P4[1] & C[0]);  //Root Carry 16
+	C[17] = G1[16] | (P1[16] & C[16]);
+	C[18] = G2[8] | (P2[8] & C[16]); 
+	C[19] = G1[18] | (P1[18] & C[18]); 
+	C[20] = G3[4] | (P3[4] & C[16]);  
+	C[21] = G1[20] | (P1[20] & C[20]); 
+	C[22] = G2[10] | (P2[10] & C[20]); 
+	C[23] = G1[22] | (P1[22] & C[22]); 
 
-	C[15] = G1[14] | (P1[14] & C[14]);
-	C[17] = G1[16] | (P1[16] &C[16]);
-	C[18] = G2[8] | (P2[8] & C[16]); //2nd order => /2
-	C[20] = G3[4] | (P3[4] & C[16]); //3rd order = /4
+	C[24] = G4[2] | (P4[2] & C[20]); //Root Carry 24 
+	C[25] = G1[24] | (P1[24] & C[24]); 
+	C[26] = G2[12] | (P2[12] & C[24]); 
+	C[27] = G1[26] | (P1[26] & C[26]); 
+	C[28] = G3[6] | (P3[6] & C[24]); 
+	C[29] = G1[28] | (P1[28] & C[28]); 
+	C[30] = G2[14] | (P2[14] & C[28]); 
+	C[31] = G1[30] | (P1[30] & C[30]); 
 
-	C[19] = G1[18] | (P1[18] & C[18]);
-	C[21] = G1[20] | (P1[20] & C[20]);
-	C[22] = G2[10] | (P2[10] & C[20]);
-	C[24] = G3[5] | (P3[5] & C[20]); //4th order => /8
+	C[32] = G4[3] | (P4[3] & C[25]); 
 
-	C[23] = G1[22] | (P1[22] & C[22]);
-	C[25] = G1[24] | (P1[24] & C[24]);
-	C[26] = G2[12] | (P2[12] & C[24]);
-	C[28] = G3[6] | (P3[6] & C[24]);
+	////Post Processing Stage --------------------
+	////Generate all carry signals that can be calculated directly from input
+	//C[1] = G1[0] | (P1[0] & C[0]);
+	//C[2] = G2[0] | (P2[0] & C[0]);
+	//C[4] = G3[0] | (P3[0] & C[0]);
+	//C[8] = G4[0] | (P4[0] & C[4]);
+	//C[12] = G3[2] | (P3[2] & C[8]);
+	//C[14] = G2[6] | (P2[6] & C[12]);
+	//C[15] = G1[14] | (P1[14] & C[14]);
 
-	C[27] = G1[26] | (P1[26] & C[26]);
-	C[29] = G1[28] | (P1[28] & C[28]);
-	C[30] = G2[14] | (P2[14] & C[28]);
-
-	C[31] = G1[30] | (P1[30] & C[30]);
+	////Now generating remaining carries
+	//C[3] = G1[2] | (P1[2] & C[2]);
+	//C[5] = G1[4] | (P1[4] & C[4]);
+	//C[6] = G2[2] | (P2[2] & C[4]);
+	//C[7] = G1[6] | (P1[6] & C[6]);
+	//C[9] = G1[8] | (P1[8] & C[8]);
+	//C[10] = G2[4] | (P2[4] & C[8]);
+	//C[11] = G1[10] | (P1[10] & C[10]);
+	//C[13] = G1[12] | (P1[12] & C[12]);
+	//C[16] = G4[1] | (P4[1] & C[12]);
+	//C[17] = G1[16] | (P1[16] & C[16]);
+	//C[18] = G2[8] | (P2[8] & C[16]);
+	//C[19] = G1[18] | (P1[18] & C[18]);
+	//C[20] = G3[4] | (P3[4] & C[16]);
+	//C[21] = G1[20] | (P1[20] & C[20]);
+	//C[22] = G2[10] | (P2[10] & C[20]);
+	//C[23] = G1[22] | (P1[22] & C[22]);
+	//C[24] = G4[2] | (P4[2] & C[20]);
+	//C[25] = G1[24] | (P1[24] & C[24]);
+	//C[26] = G2[12] | (P2[12] & C[24]);
+	//C[27] = G1[26] | (P1[26] & C[26]);
+	//C[28] = G3[6] | (P3[6] & C[24]);
+	//C[29] = G1[28] | (P1[28] & C[28]);
+	//C[30] = G2[14] | (P2[14] & C[28]);
+	//C[31] = G1[30] | (P1[30] & C[30]);
+	//C[32] = G4[3] | (P4[3] & C[28]);
 
 	for (i = 0; i <= 31; i = i + 1)
 	{
-		S[i] = P1[i] ^ C[i];
+		S[i] = P1[i] ^ C[i]; //carries and group propagate
 	}
-	//--------------------------------------------
+	//------------------------------------------
 	cout = C[32];
 
+	//WORD c[] = { cout, C[31], C[30], C[29], C[28], C[27], C[26], C[25], C[24],C[23], C[22], C[21], C[20], C[19], C[18], C[17], C[16], C[15], C[14], C[13], C[12], C[11], C[10], C[9], C[8], C[7], C[6], C[5], C[4], C[3], C[2], C[1], C[0] };
 	WORD c[] = { cout, S[31], S[30], S[29], S[28], S[27], S[26], S[25], S[24], S[23], S[22], S[21], S[20], S[19], S[18], S[17], S[16], S[15], S[14], S[13], S[12], S[11], S[10], S[9], S[8], S[7], S[6], S[5], S[4], S[3], S[2], S[1], S[0] };
 	//WORD c[] = { S[0], S[1], S[2], S[3], S[4], S[5], S[6], S[7], S[8], S[9], S[10], S[11], S[12], S[13], S[14], S[15], S[16], S[17], S[18], S[19], S[20], S[21], S[22], S[23], S[24], S[25], S[26], S[27], S[28], S[29], S[30], S[31], cout };
 	//printf("Binary number = %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d \n", cout, S[31], S[30], S[29], S[28], S[27], S[26], S[25], S[24], S[23], S[22], S[21], S[20], S[19], S[18], S[17], S[16], S[15], S[14], S[13], S[12], S[11], S[10], S[9], S[8], S[7], S[6], S[5], S[4], S[3], S[2], S[1], S[0]);
