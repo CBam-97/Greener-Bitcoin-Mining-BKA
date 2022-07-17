@@ -304,20 +304,23 @@ WORD BKA32N8(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 	C[4] = G3[0] | (P3[0] & C[0]);
 
 	//Now generating remaining carries
+	//Exact Carries
 	C[3] = G1[2] | (P1[2] & C[2]); 
 	C[5] = G1[4] | (P1[4] & C[4]); 
 	C[6] = G2[2] | (P2[2] & C[4]); 
 	C[7] = G1[6] | (P1[6] & C[6]); 
-	C[8] = G4[0] | (P4[0] & C[4]); 
-	C[9] = G1[8] | (P1[8] & C[8]); 
+
+	//Approximate/Speculative Carries
+	C[8] = G4[0] | (P4[0] & C[8]); // Root Carry 8 //Cell Carry or C0
+	C[9] = G1[8] | (P1[8] & C[8]);
 	C[10] = G2[4] | (P2[4] & C[8]); 
-	C[11] = G1[10] | (P1[10] & C[10]);
-	C[12] = G3[2] | (P3[2] & C[8]); 
+	C[11] = G1[10] | (P1[10] & C[10]); 
+	C[12] = G3[2] | (P3[2] & C[8]);  
 	C[13] = G1[12] | (P1[12] & C[12]); 
 	C[14] = G2[6] | (P2[6] & C[12]);
 	C[15] = G1[14] | (P1[14] & C[14]);
 
-	C[16] = G4[1] | (P4[1] & C[0]);  //Root Carry 16
+	C[16] = G4[1] | (P4[1] & C[16]);  //Root Carry 16 //Cell Carry or C0
 	C[17] = G1[16] | (P1[16] & C[16]);
 	C[18] = G2[8] | (P2[8] & C[16]);
 	C[19] = G1[18] | (P1[18] & C[18]);
@@ -325,8 +328,8 @@ WORD BKA32N8(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 	C[21] = G1[20] | (P1[20] & C[20]);
 	C[22] = G2[10] | (P2[10] & C[20]);
 	C[23] = G1[22] | (P1[22] & C[22]);
-
-	C[24] = G4[2] | (P4[2] & C[0]); //Root Carry 24 
+	 
+	C[24] = G4[2] | (P4[2] & C[24]); //Root Carry 24 //Cell Carry or C0
 	C[25] = G1[24] | (P1[24] & C[24]);
 	C[26] = G2[12] | (P2[12] & C[24]);
 	C[27] = G1[26] | (P1[26] & C[26]);
@@ -538,20 +541,22 @@ WORD BKA32N16(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 	C[4] = G3[0] | (P3[0] & C[0]);//
 
 	//Now generating remaining carries
-	C[3] = G1[2] | (P1[2] & C[2]); //
-	C[5] = G1[4] | (P1[4] & C[4]); //
-	C[6] = G2[2] | (P2[2] & C[4]); //
-	C[7] = G1[6] | (P1[6] & C[6]); //
-	C[8] = G4[0] | (P4[0] & C[4]); //
-	C[9] = G1[8] | (P1[8] & C[8]); //
-	C[10] = G2[4] | (P2[4] & C[8]); //
-	C[11] = G1[10] | (P1[10] & C[10]);// 
-	C[12] = G3[2] | (P3[2] & C[8]); //
-	C[13] = G1[12] | (P1[12] & C[12]); //
-	C[14] = G2[6] | (P2[6] & C[12]);//
-	C[15] = G1[14] | (P1[14] & C[14]);//
+	//Exact Carries
+	C[3] = G1[2] | (P1[2] & C[2]); 
+	C[5] = G1[4] | (P1[4] & C[4]); 
+	C[6] = G2[2] | (P2[2] & C[4]); 
+	C[7] = G1[6] | (P1[6] & C[6]); 
+	C[8] = G4[0] | (P4[0] & C[4]); 
+	C[9] = G1[8] | (P1[8] & C[8]); 
+	C[10] = G2[4] | (P2[4] & C[8]); 
+	C[11] = G1[10] | (P1[10] & C[10]);
+	C[12] = G3[2] | (P3[2] & C[8]); 
+	C[13] = G1[12] | (P1[12] & C[12]); 
+	C[14] = G2[6] | (P2[6] & C[12]);
+	C[15] = G1[14] | (P1[14] & C[14]);
 
-	C[16] = G4[1] | (P4[1] & C[0]);  //Root Carry 16
+	//Approximate/Speculative Carries
+	C[16] = G4[1] | (P4[1] & C[16]);  //Cell Carry or C0
 	C[17] = G1[16] | (P1[16] & C[16]);
 	C[18] = G2[8] | (P2[8] & C[16]); 
 	C[19] = G1[18] | (P1[18] & C[18]); 
@@ -559,8 +564,7 @@ WORD BKA32N16(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 	C[21] = G1[20] | (P1[20] & C[20]); 
 	C[22] = G2[10] | (P2[10] & C[20]); 
 	C[23] = G1[22] | (P1[22] & C[22]); 
-
-	C[24] = G4[2] | (P4[2] & C[20]); //Root Carry 24 
+	C[24] = G4[2] | (P4[2] & C[20]); 
 	C[25] = G1[24] | (P1[24] & C[24]); 
 	C[26] = G2[12] | (P2[12] & C[24]); 
 	C[27] = G1[26] | (P1[26] & C[26]); 
@@ -655,8 +659,11 @@ float electricity(float a)
 	// a = error rate
 
 	float cost;
-	float power = 5.445; // power consumption per hr
-	float elec = 0.1042; // electricity cost in USA (Kwh)
+	float power = 5.445; // power consumption per hr of the bitcoin miner S19+ Hyd
+
+	//Original electricity cost set to: 0.1042; // electricity cost in USA (Kwh). Updated on 16/07/22 by Cameron
+	float elec = 0.1447; // electricity cost in USA (Kwh) as of 16/07/2022
+	//
 	float day = 24; // 24hr in a day
 
 	float p1 = 17.33; // power(mW) in KSA32
@@ -682,19 +689,24 @@ float totalrevenue(float a,float b)
 	// a = error rate
 	// b = electricity cost
 
-	float h = 198; // hash rate
-	float h1, h2; // hash rate for KSA32(k=16) & KSA32(k=8)
+	float h = 198; // hash rate of the bitcoin miner S19+ Hyd
+	float h1, h2; // hash rate for BKA32(k=16) & BKA32(k=8)
+
 	float y = 0.203; // Mining yield y(t) (USD/Thash) per day
 
 	float e; // error rate for two rounds (cumulative error rate)
-
-	float area1 = 48801; // area in KSA32
+	 
+	//
+	float area1 = 16664; // area in BKA32 per https://www.ijert.org/research/asic-implementation-of-high-speed-and-low-power-alu-IJERTV8IS070104.pdf
+	//
 	float area2 = 47829; // reduced area in KSA32(k=16)
 	float area3 = 46299; // reduced area in KSA32(k = 8)
 
-	float delay1 = 1.86; // delay in KSA32
+	//
+	float delay1 = 1.73; // delay in BKA32 according to https://www.researchgate.net/publication/237409594_Speculative_Completion_for_the_Design_of_High-Performance_Asynchronous_Dynamic_Adders
+	//
 	float delay2 = 1.73; // reduced delay in KSA32(k=16)
-	float delay3 = 1.58; // reduced delay in KSA32(k = 8)
+	float delay3 = 1.49; // reduced delay in KSA32(k = 8)
 	float revenue;
 	
 
@@ -2877,6 +2889,7 @@ int main()
 	float k16revenue = totalrevenue(error2, k16cost);
 	float k16profit = totalprofit(k16revenue, k16cost);
 	float k16profitgain = ((k16profit / k0profit) - 1) * 100;
+
 	printf("SHA256 with approximate BKA32(k=16) adder profit & cost \n");
 	printf("Revenue: %.3f \n", k16revenue);
 	printf("Electricity cost: %.3f \n", k16cost);
@@ -2897,6 +2910,7 @@ int main()
 	float k8revenue = totalrevenue(error1, k8cost);
 	float k8profit = totalprofit(k8revenue, k8cost);
 	float k8profitgain = ((k8profit / k0profit) - 1) * 100;
+
 	printf("SHA256 with approximate BK32(k=8) adder profit & cost \n");
 	printf("Revenue: %.3f \n", k8revenue);
 	printf("Electricity cost: %.3f \n", k8cost);
@@ -2905,16 +2919,4 @@ int main()
 	return(0);
 
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
-
 #pragma endregion
