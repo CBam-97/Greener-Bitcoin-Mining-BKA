@@ -659,16 +659,18 @@ float electricity(float a)
 	// a = error rate
 
 	float cost;
-	float power = 5.445; // power consumption per hr of the bitcoin miner S19+ Hyd
+	float power = 3.250; // power consumption per hr of the bitcoin miner S19 Pro https://shop.bitmain.com/product/detail?pid=00020220616112636834T0C1ADTd062A
 
 	//Original electricity cost set to: 0.1042; // electricity cost in USA (Kwh). Updated on 16/07/22 by Cameron
 	float elec = 0.1447; // electricity cost in USA (Kwh) as of 16/07/2022
 	//
 	float day = 24; // 24hr in a day
 
-	float p1 = 17.33; // power(mW) in KSA32
-	float p2 = 19; // power(mW) in KSA32(k=16)
-	float p3 = 20.4; // power(mW) in KSA32(k=8)
+	//ESTIMATES adapted using KSA Results and Comparison results from: https://www.researchgate.net/publication/331736313_Design_and_Analysis_of_32-bit_Parallel_Prefix_Adders_for_Low_Power_VLSI_Applications
+	//BKA figure is quoted as approximately 114% higher than power consumption of KSA
+	float p1 = 19.75; // power(mW) in KSA32 = 17.33 / 100 * 114 for BKA32
+	float p2 = 21.66; // power(mW) in KSA32(k=16) = 19 / 100 * 114 for BKA32(k=16)
+	float p3 = 23.256; // power(mW) in KSA32(k=8) = 20.4 / 100 * 114 for BKA32(k=8)
 	if (a == 0)
 	{
 		cost = (power * elec) * day; // power consumption cost per day for SHA256 with normal BKA 32 adder
@@ -689,24 +691,24 @@ float totalrevenue(float a,float b)
 	// a = error rate
 	// b = electricity cost
 
-	float h = 198; // hash rate of the bitcoin miner S19+ Hyd
+	float h = 110; // hash rate of the bitcoin miner S19 Pro https://shop.bitmain.com/product/detail?pid=00020220616112636834T0C1ADTd062A
 	float h1, h2; // hash rate for BKA32(k=16) & BKA32(k=8)
 
 	float y = 0.203; // Mining yield y(t) (USD/Thash) per day
 
 	float e; // error rate for two rounds (cumulative error rate)
 	 
-	//
-	float area1 = 16664; // area in BKA32 per https://www.ijert.org/research/asic-implementation-of-high-speed-and-low-power-alu-IJERTV8IS070104.pdf
-	//
-	float area2 = 47829; // reduced area in KSA32(k=16)
-	float area3 = 46299; // reduced area in KSA32(k = 8)
+	//ESTIMATES adapted using KSA Results and Comparison results from: https://www.researchgate.net/publication/331736313_Design_and_Analysis_of_32-bit_Parallel_Prefix_Adders_for_Low_Power_VLSI_Applications
+	//BKA figure is quoted as approximately 17.5% lower than area consumption of KSA (82.5%)
+	float area1 = 40260; // ESTIMATE area in BKA32
+	float area2 = 39458; // ESTIMATE reduced area in BKA32(k=16)
+	float area3 = 38196; // ESTIMATE reduced area in BKA32(k=8)
 
-	//
-	float delay1 = 1.73; // delay in BKA32 according to https://www.researchgate.net/publication/237409594_Speculative_Completion_for_the_Design_of_High-Performance_Asynchronous_Dynamic_Adders
-	//
-	float delay2 = 1.73; // reduced delay in KSA32(k=16)
-	float delay3 = 1.49; // reduced delay in KSA32(k = 8)
+	// Delay figures estimated using: https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7889974 - BKA total delay works out at 104%~ of KSA delay
+	float delay1 = 1.93; // ESTIMATE delay in BKA32
+	float delay2 = 1.79; // ESTIMATE reduced delay in BKA32(k=16)
+	float delay3 = 1.64; // ESTIMATE reduced delay in BKA32(k=8)
+
 	float revenue;
 	
 
