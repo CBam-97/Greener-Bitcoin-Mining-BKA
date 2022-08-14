@@ -575,42 +575,6 @@ WORD BKA32N16(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 
 	C[32] = G4[3] | (P4[3] & C[25]); 
 
-	////Post Processing Stage --------------------
-	////Generate all carry signals that can be calculated directly from input
-	//C[1] = G1[0] | (P1[0] & C[0]);
-	//C[2] = G2[0] | (P2[0] & C[0]);
-	//C[4] = G3[0] | (P3[0] & C[0]);
-	//C[8] = G4[0] | (P4[0] & C[4]);
-	//C[12] = G3[2] | (P3[2] & C[8]);
-	//C[14] = G2[6] | (P2[6] & C[12]);
-	//C[15] = G1[14] | (P1[14] & C[14]);
-
-	////Now generating remaining carries
-	//C[3] = G1[2] | (P1[2] & C[2]);
-	//C[5] = G1[4] | (P1[4] & C[4]);
-	//C[6] = G2[2] | (P2[2] & C[4]);
-	//C[7] = G1[6] | (P1[6] & C[6]);
-	//C[9] = G1[8] | (P1[8] & C[8]);
-	//C[10] = G2[4] | (P2[4] & C[8]);
-	//C[11] = G1[10] | (P1[10] & C[10]);
-	//C[13] = G1[12] | (P1[12] & C[12]);
-	//C[16] = G4[1] | (P4[1] & C[12]);
-	//C[17] = G1[16] | (P1[16] & C[16]);
-	//C[18] = G2[8] | (P2[8] & C[16]);
-	//C[19] = G1[18] | (P1[18] & C[18]);
-	//C[20] = G3[4] | (P3[4] & C[16]);
-	//C[21] = G1[20] | (P1[20] & C[20]);
-	//C[22] = G2[10] | (P2[10] & C[20]);
-	//C[23] = G1[22] | (P1[22] & C[22]);
-	//C[24] = G4[2] | (P4[2] & C[20]);
-	//C[25] = G1[24] | (P1[24] & C[24]);
-	//C[26] = G2[12] | (P2[12] & C[24]);
-	//C[27] = G1[26] | (P1[26] & C[26]);
-	//C[28] = G3[6] | (P3[6] & C[24]);
-	//C[29] = G1[28] | (P1[28] & C[28]);
-	//C[30] = G2[14] | (P2[14] & C[28]);
-	//C[31] = G1[30] | (P1[30] & C[30]);
-	//C[32] = G4[3] | (P4[3] & C[28]);
 
 	for (i = 0; i <= 31; i = i + 1)
 	{
@@ -653,7 +617,7 @@ WORD BKA32N16(WORD n, WORD m) // range -4294967296 to 4294967296 each number
 //These will need edited with BKA statistics
 
 #pragma region Cost functions
-// Original cost for SHA256 with KSA32 adders
+// Original cost for SHA256 with BKA32 adders
 float electricity(float a)
 {
 	// a = error rate
@@ -662,15 +626,15 @@ float electricity(float a)
 	float power = 3.250; // power consumption per hr of the bitcoin miner S19 Pro https://shop.bitmain.com/product/detail?pid=00020220616112636834T0C1ADTd062A
 
 	//Original electricity cost set to: 0.1042; // electricity cost in USA (Kwh). Updated on 16/07/22 by Cameron
-	float elec = 0.1447; // electricity cost in USA (Kwh) as of 16/07/2022
+	float elec = 0.1331; // electricity cost in USA (Kwh) as of 27/07/2022
 	//
 	float day = 24; // 24hr in a day
 
-	//ESTIMATES adapted using KSA Results and Comparison results from: https://www.researchgate.net/publication/331736313_Design_and_Analysis_of_32-bit_Parallel_Prefix_Adders_for_Low_Power_VLSI_Applications
-	//BKA figure is quoted as approximately 114% higher than power consumption of KSA
+	//ESTIMATES adapted using KSA Figures and Comparison results from: https://www.researchgate.net/publication/331736313_Design_and_Analysis_of_32-bit_Parallel_Prefix_Adders_for_Low_Power_VLSI_Applications
+	//BKA figure is quoted as approximately 14% higher than power consumption of KSA
 	float p1 = 19.75; // power(mW) in KSA32 = 17.33 / 100 * 114 for BKA32
 	float p2 = 21.66; // power(mW) in KSA32(k=16) = 19 / 100 * 114 for BKA32(k=16)
-	float p3 = 23.256; // power(mW) in KSA32(k=8) = 20.4 / 100 * 114 for BKA32(k=8)
+	float p3 = 23.26; // power(mW) in KSA32(k=8) = 20.4 / 100 * 114 for BKA32(k=8)
 	if (a == 0)
 	{
 		cost = (power * elec) * day; // power consumption cost per day for SHA256 with normal BKA 32 adder
@@ -694,20 +658,21 @@ float totalrevenue(float a,float b)
 	float h = 110; // hash rate of the bitcoin miner S19 Pro https://shop.bitmain.com/product/detail?pid=00020220616112636834T0C1ADTd062A
 	float h1, h2; // hash rate for BKA32(k=16) & BKA32(k=8)
 
-	float y = 0.203; // Mining yield y(t) (USD/Thash) per day
+	float y = 0.20; // Mining yield y(t) (USD/Thash) per day
 
 	float e; // error rate for two rounds (cumulative error rate)
 	 
-	//ESTIMATES adapted using KSA Results and Comparison results from: https://www.researchgate.net/publication/331736313_Design_and_Analysis_of_32-bit_Parallel_Prefix_Adders_for_Low_Power_VLSI_Applications
-	//BKA figure is quoted as approximately 17.5% lower than area consumption of KSA (82.5%)
-	float area1 = 40260; // ESTIMATE area in BKA32
-	float area2 = 39458; // ESTIMATE reduced area in BKA32(k=16)
-	float area3 = 38196; // ESTIMATE reduced area in BKA32(k=8)
+	//ESTIMATES adapted using KSA Figures and Comparison results from: https://www.researchgate.net/publication/331736313_Design_and_Analysis_of_32-bit_Parallel_Prefix_Adders_for_Low_Power_VLSI_Applications
+	//BKA figure is quoted as approximately 17.5% lower than area of KSA (82.5%)
+	float area1 = 40260; // Area in KSA32 = 48801 / 100 * 82.5 for BKA32
+	float area2 = 39458; // Reduced area in KSA32(k=16) = 47829 / 100 * 82.5 for BKA32(k=16)
+	float area3 = 38196; // Reduced area in KSA32(k=8) = 46299 / 100 * 82.5 for BKA32(k=8)
 
-	// Delay figures estimated using: https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7889974 - BKA total delay works out at 104%~ of KSA delay
-	float delay1 = 1.93; // ESTIMATE delay in BKA32
-	float delay2 = 1.79; // ESTIMATE reduced delay in BKA32(k=16)
-	float delay3 = 1.64; // ESTIMATE reduced delay in BKA32(k=8)
+	// Delay figures estimated using: https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7889974
+	//BKA total delay works out at 104%~ of KSA delay
+	float delay1 = 1.79; // Delay in KSA32 = 1.86 / 100 * 104 for BKA32
+	float delay2 = 1.54; // Delay in KSA32(k=16) = 1.73 / 100 * 104 for BKA32(k=16)
+	float delay3 = 1.26; // Delay in KSA32(k=8) = 1.58 / 100 * 104 for BKA32(k=8)
 
 	float revenue;
 	
@@ -720,12 +685,12 @@ float totalrevenue(float a,float b)
 	}
 	else if (a < 0.5)
 	{
-		h1 = ((1 - e)/(area2/area1))*h*((delay1/delay2)); // calculate hash rate with reduced area & delay for KSA32(k=16)
+		h1 = ((1 - e)/(area2/area1))*h*((delay1/delay2)); // calculate hash rate with reduced area & delay for BKA32(k=16)
 		revenue = (h1*y);
 	}
 	else
 	{
-		h2 = ((1 - e)/(area3/area1))*h*(delay1/delay3); // calculate hash rate with reduced area & delay for KSA32(k=8)
+		h2 = ((1 - e)/(area3/area1))*h*(delay1/delay3); // calculate hash rate with reduced area & delay for BKA32(k=8)
 		revenue = (h2 * y);
 	}
 	return revenue;
@@ -745,8 +710,8 @@ float totalprofit(float a, float b)
 
 //SHA256 Code
 
-#pragma region SHA256 code with KSA32 non-approximate adder
-// SHA256 with KSA32 adder
+#pragma region SHA256 code with BKA32 non-approximate adder
+// SHA256 with BKA32 adder
 void sha256_transform(SHA256_CTX* ctx, const BYTE data[]) // with CLA adder
 {
 
@@ -793,8 +758,8 @@ void sha256_transform(SHA256_CTX* ctx, const BYTE data[]) // with CLA adder
 		//Calculating value of CSA 2 C-Out
 		cout2 = CSAcout(inp11, inp22, inp33);
 
-		// 2) KSA32 exp
-		// Calculating value of KSA32 output
+		// 2) BKA32 exp
+		// Calculating value of BKA32 output
 		CPAexpout = BKA32(sum2, cout2);
 
 		// Edited SHA256
@@ -858,8 +823,8 @@ void sha256_transform(SHA256_CTX* ctx, const BYTE data[]) // with CLA adder
 		//Calculating value of CSA 2 C-Out
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
-		// KSA32 comp 1
-		// Calculating value of KSA32 output
+		// BKA32 comp 1
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32(csasum4, csacout4);
 
 
@@ -868,7 +833,7 @@ void sha256_transform(SHA256_CTX* ctx, const BYTE data[]) // with CLA adder
 		//path 2
 		// need to declare CPAcomp2 first
 		/// CPA comp 2
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32(a1, a0);
 
 		// CSA 1 & L1
@@ -968,7 +933,7 @@ void sha256_transform(SHA256_CTX* ctx, const BYTE data[]) // with CLA adder
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
 		// CPA comp 1
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32(csasum4, csacout4);
 
 
@@ -976,8 +941,8 @@ void sha256_transform(SHA256_CTX* ctx, const BYTE data[]) // with CLA adder
 
 		//path 2
 		// need to declare CPAcomp2 first
-		/// KSA32 comp 2
-		// Calculating value of KSA32 output
+		/// BKA32 comp 2
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32(a1, a0);
 
 		// CSA 1 & L1
@@ -1077,7 +1042,7 @@ void sha256_transform(SHA256_CTX* ctx, const BYTE data[]) // with CLA adder
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
 		// CPA comp 1
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32(csasum4, csacout4);
 
 
@@ -1085,8 +1050,8 @@ void sha256_transform(SHA256_CTX* ctx, const BYTE data[]) // with CLA adder
 
 		//path 2
 		// need to declare CPAcomp2 first
-		/// KSA32 comp 2
-		// Calculating value of KSA32 output
+		/// BKA32 comp 2
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32(a1, a0);
 
 		// CSA 1 & L1
@@ -1189,14 +1154,14 @@ void sha256_transform(SHA256_CTX* ctx, const BYTE data[]) // with CLA adder
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
 		// CPA comp 1
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32(csasum4, csacout4);
 
 
 		//path 2
 		// need to declare CPAcomp2 first
-		/// KSA32 comp 2
-		// Calculating value of KSA32 output
+		/// BKA32 comp 2
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32(a1, a0);
 
 		// CSA 1 & L1
@@ -1457,8 +1422,8 @@ void sha256_transformBKA32N8(SHA256_CTX1* ctx1, const BYTE data[]) // with CLA a
 		//Calculating value of CSA 2 C-Out
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
-		// KSA32 comp 1
-		// Calculating value of KSA32 output
+		// BKA32 comp 1
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32N8(csasum4, csacout4);
 
 
@@ -1467,7 +1432,7 @@ void sha256_transformBKA32N8(SHA256_CTX1* ctx1, const BYTE data[]) // with CLA a
 		//path 2
 		// need to declare CPAcomp2 first
 		/// CPA comp 2
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32N8(a1, a0);
 
 		// CSA 1 & L1
@@ -1567,7 +1532,7 @@ void sha256_transformBKA32N8(SHA256_CTX1* ctx1, const BYTE data[]) // with CLA a
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
 		// CPA comp 1
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32N8(csasum4, csacout4);
 
 
@@ -1575,8 +1540,8 @@ void sha256_transformBKA32N8(SHA256_CTX1* ctx1, const BYTE data[]) // with CLA a
 
 		//path 2
 		// need to declare CPAcomp2 first
-		/// KSA32 comp 2
-		// Calculating value of KSA32 output
+		/// BKA32 comp 2
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32N8(a1, a0);
 
 		// CSA 1 & L1
@@ -1676,7 +1641,7 @@ void sha256_transformBKA32N8(SHA256_CTX1* ctx1, const BYTE data[]) // with CLA a
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
 		// CPA comp 1
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32N8(csasum4, csacout4);
 
 
@@ -1684,8 +1649,8 @@ void sha256_transformBKA32N8(SHA256_CTX1* ctx1, const BYTE data[]) // with CLA a
 
 		//path 2
 		// need to declare CPAcomp2 first
-		/// KSA32 comp 2
-		// Calculating value of KSA32 output
+		/// BKA32 comp 2
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32N8(a1, a0);
 
 		// CSA 1 & L1
@@ -1788,14 +1753,14 @@ void sha256_transformBKA32N8(SHA256_CTX1* ctx1, const BYTE data[]) // with CLA a
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
 		// CPA comp 1
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32N8(csasum4, csacout4);
 
 
 		//path 2
 		// need to declare CPAcomp2 first
-		/// KSA32 comp 2
-		// Calculating value of KSA32 output
+		/// BKA32 comp 2
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32N8(a1, a0);
 
 		// CSA 1 & L1
@@ -1943,8 +1908,8 @@ void sha256_finalBKA32N8(SHA256_CTX1* ctx1, BYTE hash[])
 }
 #pragma endregion
 
-#pragma region SHA256 with approximate KSA32(K=16) adder
-// SHA256 with approximate KSA32(K=16) adder
+#pragma region SHA256 with approximate BKA32(K=16) adder
+// SHA256 with approximate BKA32(K=16) adder
 void sha256_transformBKA32N16(SHA256_CTX2* ctx2, const BYTE data[]) // with CLA adder
 {
 
@@ -1991,8 +1956,8 @@ void sha256_transformBKA32N16(SHA256_CTX2* ctx2, const BYTE data[]) // with CLA 
 		//Calculating value of CSA 2 C-Out
 		cout2 = CSAcout(inp11, inp22, inp33);
 
-		// 2) KSA32 exp
-		// Calculating value of KSA32 output
+		// 2) BKA32 exp
+		// Calculating value of BKA32 output
 		CPAexpout = BKA32N16(sum2, cout2);
 
 		// Edited SHA256
@@ -2056,8 +2021,8 @@ void sha256_transformBKA32N16(SHA256_CTX2* ctx2, const BYTE data[]) // with CLA 
 		//Calculating value of CSA 2 C-Out
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
-		// KSA32 comp 1
-		// Calculating value of KSA32 output
+		// BKA32 comp 1
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32N16(csasum4, csacout4);
 
 
@@ -2066,7 +2031,7 @@ void sha256_transformBKA32N16(SHA256_CTX2* ctx2, const BYTE data[]) // with CLA 
 		//path 2
 		// need to declare CPAcomp2 first
 		/// CPA comp 2
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32N16(a1, a0);
 
 		// CSA 1 & L1
@@ -2166,7 +2131,7 @@ void sha256_transformBKA32N16(SHA256_CTX2* ctx2, const BYTE data[]) // with CLA 
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
 		// CPA comp 1
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32N16(csasum4, csacout4);
 
 
@@ -2174,8 +2139,8 @@ void sha256_transformBKA32N16(SHA256_CTX2* ctx2, const BYTE data[]) // with CLA 
 
 		//path 2
 		// need to declare CPAcomp2 first
-		/// KSA32 comp 2
-		// Calculating value of KSA32 output
+		/// BKA32 comp 2
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32N16(a1, a0);
 
 		// CSA 1 & L1
@@ -2275,7 +2240,7 @@ void sha256_transformBKA32N16(SHA256_CTX2* ctx2, const BYTE data[]) // with CLA 
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
 		// CPA comp 1
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32N16(csasum4, csacout4);
 
 
@@ -2283,8 +2248,8 @@ void sha256_transformBKA32N16(SHA256_CTX2* ctx2, const BYTE data[]) // with CLA 
 
 		//path 2
 		// need to declare CPAcomp2 first
-		/// KSA32 comp 2
-		// Calculating value of KSA32 output
+		/// BKA32 comp 2
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32N16(a1, a0);
 
 		// CSA 1 & L1
@@ -2387,14 +2352,14 @@ void sha256_transformBKA32N16(SHA256_CTX2* ctx2, const BYTE data[]) // with CLA 
 		csacout4 = CSAcout(csa1111, csa2222, csa3333);
 
 		// CPA comp 1
-		// Calculating value of KSA32 output
+		// Calculating value of BKA32 output
 		CPAcomp1 = BKA32N16(csasum4, csacout4);
 
 
 		//path 2
 		// need to declare CPAcomp2 first
-		/// KSA32 comp 2
-		// Calculating value of KSA32 output
+		/// BKA32 comp 2
+		// Calculating value of BKA32 output
 		CPAcomp2 = BKA32N16(a1, a0);
 
 		// CSA 1 & L1
@@ -2653,22 +2618,22 @@ int main()
 	srand((unsigned int)time(0) + _getpid());
 
 	//Hexadecimal Hash Files
-	FILE* fp; //File for non approximate KSA32 Hashes in hexadecimal
-	FILE* fp1; //File for approximate KSA32 K=8 Hashes in hexadecimal
-	FILE* fp2; //File for approximate KSA32 K=16 Hashes in hexadecimal
+	FILE* fp; //File for non approximate BKA32 Hashes in hexadecimal
+	FILE* fp1; //File for approximate BKA32 K=8 Hashes in hexadecimal
+	FILE* fp2; //File for approximate BKA32 K=16 Hashes in hexadecimal
 	
-	fopen_s(&fp, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\HashOutputFiles\\NonApproxBKAHashFile.txt", "w+"); //Open file for non approximate KSA32 Hashes
-	fopen_s(&fp1, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\HashOutputFiles\\ApproxBKAK8HashFile.txt", "w+"); //Open file for approximate KSA32 K=8 Hashes
-	fopen_s(&fp2, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\HashOutputFiles\\ApproxBKAK16HashFile.txt", "w+"); //Open file for approximate KSA32 K=16 Hashes
+	fopen_s(&fp, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\HashOutputFiles\\NonApproxBKAHashFile.txt", "w+"); //Open file for non approximate BKA32 Hashes
+	fopen_s(&fp1, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\HashOutputFiles\\ApproxBKAK8HashFile.txt", "w+"); //Open file for approximate BKA32 K=8 Hashes
+	fopen_s(&fp2, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\HashOutputFiles\\ApproxBKAK16HashFile.txt", "w+"); //Open file for approximate BKA32 K=16 Hashes
 
 	//Binary Hash Files
-	FILE* fp3; //File for non approximate KSA32 Hashes in binary format
-	FILE* fp4; //File for approximate KSA32 K=8 Hashes in binary format
-	FILE* fp5; //File for approximate KSA32 K=16 Hasesh in binary format
+	FILE* fp3; //File for non approximate BKA32 Hashes in binary format
+	FILE* fp4; //File for approximate BKA32 K=8 Hashes in binary format
+	FILE* fp5; //File for approximate BKA32 K=16 Hasesh in binary format
 	
-	fopen_s(&fp3, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\BinaryHashOuputFiles\\NonApproxBKAHashBinaryFile.txt", "w + "); //Open file for non approximate KSA32 Hashes in binary format
-	fopen_s(&fp4, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\BinaryHashOuputFiles\\ApproxBKAK8HashBinaryFile.txt", "w + "); //Open file for non approximate KSA32 Hashes in binary format
-	fopen_s(&fp5, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\BinaryHashOuputFiles\\ApproxBKAK16HashBinaryFile.txt", "w + "); //Open file for non approximate KSA32 Hashes in binary format
+	fopen_s(&fp3, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\BinaryHashOuputFiles\\NonApproxBKAHashBinaryFile.txt", "w + "); //Open file for non approximate BKA32 Hashes in binary format
+	fopen_s(&fp4, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\BinaryHashOuputFiles\\ApproxBKAK8HashBinaryFile.txt", "w + "); //Open file for non approximate BKA32 Hashes in binary format
+	fopen_s(&fp5, "C:\\Users\\Cameron\\source\\repos\\My Project Code\\BKA\\KSA\\BinaryHashOuputFiles\\ApproxBKAK16HashBinaryFile.txt", "w + "); //Open file for non approximate BKA32 Hashes in binary format
 
 	if (fp == NULL) //Check if the file is null
 	{
@@ -2691,7 +2656,7 @@ int main()
 	fflush(stdin);
 
 	// Run the simulation 10000 times
-	for (i = 0; i < 1000; i++)
+	for (i = 0; i < 10000; i++)
 	{
 
 		int test1 = 1;
@@ -2714,7 +2679,7 @@ int main()
 
 		// -------------------------
 		// What is observed here, are the input hashes being hashed again (as is custom within the bitcoin network) using a variety of different schemes.
-		// These are as follows: Non approximate KSA32, Approximate KSA32(K=8) and Approximate KSA32(K=16).
+		// These are as follows: Non approximate BKA32, Approximate BKA32(K=8) and Approximate BKA32(K=16).
 		// The output hashes from these schemes can be verified to be correct using an online SHA256 encoder/decoder.
 
 		// What now must be done for my project is to obtain all 1000 simulations of each of the hash outputs from these schemes, and place these within a file to 
@@ -2763,12 +2728,12 @@ int main()
 		fprintf(fp3, "\n"); //New Line in text file
 		printf("\n"); //New Line on Console Application
 
-		//sha256 with approximate KSA32(K=8)
+		//sha256 with approximate BKA32(K=8)
 		sha256_initBKA32N8(&ctx1);
 		sha256_updateBKA32N8(&ctx1, (const BYTE*)SHA256_input, strlen((const char*)SHA256_input));
 		sha256_finalBKA32N8(&ctx1, buf1);
 
-		//Print a hash from approximate KSA32(K=8)
+		//Print a hash from approximate BKA32(K=8)
 		printf("Hash from approximate BKA32(K=8): ");
 		for (x = 0; x < SHA256_BLOCK_SIZE; x++)
 		{
@@ -2789,12 +2754,12 @@ int main()
 		fprintf(fp4, "\n"); //New Line in text file
 		printf("\n"); //New Line on Console Application
 
-		//sha256 with approximate KSA32(K=16)
+		//sha256 with approximate BKA32(K=16)
 		sha256_initBKA32N16(&ctx2);
 		sha256_updateBKA32N16(&ctx2, (const BYTE*)SHA256_input, strlen((const char*)SHA256_input));
 		sha256_finalBKA32N16(&ctx2, buf2);
 
-		//Print a hash from approximate KSA32(K=16)
+		//Print a hash from approximate BKA32(K=16)
 		printf("Hash from approximate BKA32(K=16): ");
 		for (y = 0; y < SHA256_BLOCK_SIZE; y++)
 		{
@@ -2817,7 +2782,7 @@ int main()
 		printf("\n"); //New Line on Console Application
 
 		//Tests
-		test1 = test1 && !memcmp(buf, buf1, SHA256_BLOCK_SIZE); //Comparing memory buffer of hashes from non-approx KSA and approximate KSA(K=8)
+		test1 = test1 && !memcmp(buf, buf1, SHA256_BLOCK_SIZE); //Comparing memory buffer of hashes from non-approx BKA and approximate BKA(K=8)
 
 		if (test1 == 1)
 		{
@@ -2834,7 +2799,7 @@ int main()
 			printf("\n");
 		}
 
-		test2 = test2 && !memcmp(buf, buf2, SHA256_BLOCK_SIZE); //Comparing memory buffer of hashes from non-approx KSA and approximate KSA(K=16)
+		test2 = test2 && !memcmp(buf, buf2, SHA256_BLOCK_SIZE); //Comparing memory buffer of hashes from non-approx BKA and approximate BKA(K=16)
 
 		if (test2 == 1)
 		{
@@ -2861,7 +2826,7 @@ int main()
 
 	// Display results and profit
 	// Profit calculation
-	// SHA256 with KSA32 adder
+	// SHA256 with BKAA32 adder
 	float k0cost = electricity(0);
 	float k0revenue = totalrevenue(0, k0cost);
 	float k0profit = totalprofit(k0revenue, k0cost);
@@ -2872,52 +2837,58 @@ int main()
 	printf("\n");
 	printf("-----------------------------------------------------------------------------------");
 	printf("\n");
-	printf("SHA256 with non-approximate BKA32 adder profit & cost \n");
+	printf("\n");
+	printf("\n");
+	printf("SHA256 WITH NON-APPROXIMATE BKA32 PROFITS & COST \n");
 	printf("Revenue: %.3f \n", k0revenue);
 	printf("Electricity cost: %.3f \n", k0cost);
 	printf("Profit: %.3f \n\n\n\n", k0profit);
 
 
-	// KSA32 against approximate KSA32(k=16)
-	printf("Compare SHA256 output(Normal BKA32 adder against approximate BKA32(k=16) adder\n");
+	// BKA32 against approximate BKA32(k=16)
+	printf("-----------------------------------------------------------------------------------");
+	printf("\n");
+	printf("COMPARE SHA256 OUTPUT (Normal BKA32 adder Vs. approximate BKA32(k=16) adder\n");
 	printf("Simulation: %.f times\n", simulation);
 	printf("Passed: %.f\n", pass2);
 	printf("Failed: %.f\n", fail2);
 	printf("Error rate: %.3f percent\n\n", (error2 * 100));
 
 	// Profit calculation
-	// SHA256 with approximate KSA32(k=16) adder
+	// SHA256 with approximate BKA32(k=16) adder
 	float k16cost = electricity(error2);
 	float k16revenue = totalrevenue(error2, k16cost);
 	float k16profit = totalprofit(k16revenue, k16cost);
 	float k16profitgain = ((k16profit / k0profit) - 1) * 100;
 
-	printf("SHA256 with approximate BKA32(k=16) adder profit & cost \n");
+	printf("SHA256 WITH APPROXIMATE BKA32(k=16) PROFITS & COST \n");
 	printf("Revenue: %.3f \n", k16revenue);
 	printf("Electricity cost: %.3f \n", k16cost);
 	printf("Profit: %.3f \n", k16profit);
-	printf("Profit gain against non-approximate SHA256: %.3f percent \n\n\n\n", k16profitgain);
+	printf("Profit gain against non-approximate BKA32: %.3f percent \n\n\n\n", k16profitgain);
 
 
-	// KSA32 against approximate KSA32(k=8) 
-	printf("Compare SHA256 output(Normal BKA32 adder against approximate BKA32(k=8) adder\n");
+	// BKA32 against approximate BKA32(k=8) 
+	printf("-----------------------------------------------------------------------------------");
+	printf("\n");
+	printf("COMPARE SHA256 OUTPUT (Normal BKA32 adder Vs. approximate BKA32(k=8) adder \n");
 	printf("Simulation: %.f times\n", simulation);
 	printf("Passed: %.f\n", pass1);
 	printf("Failed: %.f\n", fail1);
 	printf("Error rate: %.3f percent\n\n", (error1 * 100));
 
 	// Profit calculation
-	// SHA256 with approximate KSA32(k=8) adder
+	// SHA256 with approximate BKA32(k=8) adder
 	float k8cost = electricity(error1);
 	float k8revenue = totalrevenue(error1, k8cost);
 	float k8profit = totalprofit(k8revenue, k8cost);
 	float k8profitgain = ((k8profit / k0profit) - 1) * 100;
 
-	printf("SHA256 with approximate BK32(k=8) adder profit & cost \n");
+	printf("SHA256 WITH APPROXIMATE BKA32(k=8) PROFITS & COST \n");
 	printf("Revenue: %.3f \n", k8revenue);
 	printf("Electricity cost: %.3f \n", k8cost);
 	printf("Profit: %.3f \n", k8profit);
-	printf("Profit gain against non-approximate SHA256: %.3f percent \n\n\n\n", k8profitgain);
+	printf("Profit gain against non-approximate BKA32: %.3f percent \n\n\n\n", k8profitgain);
 	return(0);
 
 }
